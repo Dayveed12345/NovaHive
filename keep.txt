@@ -1,0 +1,30 @@
+
+contract voting{
+    struct Issue {
+        address plaintiff;
+        address defendant;
+        //true means it is still opened;
+        //false means it is closed;
+        bool status;
+        uint256 endTime;
+        
+    }
+    mapping(address=>bool) public hasVote;
+    constructor(){
+        //  Don't know what to add here yet.
+    }
+    mapping (uint256 => issue) public issues;
+    function viewvote(uint256 id)  public  view returns(address, address, uint256, uint256, uint256) {
+         require(id!=0,"This Issue does not exist");
+         Issue storage issue=issues[id];
+         return (issue.plaintiff, issue.defendant,,,issue.status,issue.endTime);
+    }
+    function castVote(uint256 id, address votes)public{
+        require(hasVote[votes]=false,"You can't vote twice");
+          Issue storage issue=issues[id];
+          require(issue.status=false,"Status is closed");
+          issue.
+        // check if the issue is not closed
+        //check if the user has voted
+
+    }
