@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-contract VotingSystem {
+contract Issue {
     struct Issue {
         address plaintiff;
         address defendant;
@@ -15,6 +16,12 @@ contract VotingSystem {
     mapping(bytes32 => Issue) public issues;
 
     event Voted(address indexed voter, bytes32 indexed issueId);
+
+    AggregatorV3Interface internal priceFeed; // Chainlink Price Feed
+
+    constructor(address _priceFeedAddress) {
+        priceFeed = AggregatorV3Interface(_priceFeedAddress);
+    }
 
     function createIssue(bytes32 issueId, address _plaintiff, address _defendant, uint256 _endTime) public {
         require(issues[issueId].endTime == 0, "Issue already exists");
@@ -70,5 +77,16 @@ contract VotingSystem {
         } else {
             return address(0); // Indicates a draw
         }
+    }
+
+    function getLatestPrice() public view returns (uint256) {
+        (
+            uint80 roundID,
+            int256 price,
+            uint256 startedAt,
+            uint256 timeStamp,
+            uint80 answeredInRound
+        ) = priceFeed.latestRoundData();
+        return uint256(price);
     }
 }

@@ -1,5 +1,6 @@
-//SPDX-License-Identifier:MIT
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract Bidding {
     struct Project {
@@ -20,6 +21,12 @@ contract Bidding {
     );
     event BidPlaced(uint256 indexed projectId, address indexed bidder, uint256 amount);
     event AmountWithdrawn(uint256 indexed projectId, address indexed projectOwner, uint256 amount);
+
+    AggregatorV3Interface internal priceFeed; // Chainlink Price Feed
+
+    constructor(address _priceFeedAddress) {
+        priceFeed = AggregatorV3Interface(_priceFeedAddress);
+    }
 
     modifier onlyProjectOwner(uint256 id) {
         require(msg.sender == projects[id].projectOwner, "Only project owner can perform this action");
@@ -103,5 +110,16 @@ contract Bidding {
         require(msg.sender == project.currentWinner, "You are not the highest bidder");
         project.approve = true;
         return true;
+    }
+
+    function getLatestPrice() public view returns (uint256) {
+        (
+            uint80 roundID,
+            int256 price,
+            uint256 startedAt,
+            uint256 timeStamp,
+            uint80 answeredInRound
+        ) = priceFeed.latestRoundData();
+        return uint256(price);
     }
 }
